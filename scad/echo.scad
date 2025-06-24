@@ -1,7 +1,9 @@
 
 module alu_2020(length) {
-    translate([0, 0, length/2]) {
-        cube([20, 20, length],center=true);
+    color("gray") {
+        translate([0, 0, length/2]) {
+            cube([20, 20, length],center=true);
+        }
     }
 }
 
@@ -14,7 +16,7 @@ module alu_2040(length) {
 }
 
 
-module frame() {
+module echo_frame() {
     translate([-496/2, 496/2+10, 20]) {
         rotate([90, 0, 90]) {
             alu_2040(496);
@@ -140,7 +142,151 @@ module nema17(height) {
 }
 
 
+module mgn12_rail(length) {
+    difference() {
+        translate([0, length/2, 4]) {
+            cube([12, length, 8], center=true);
+        }
+        
+        for(i = [12.5:25:length]) {
+            translate([0, i, 0]) {
+                cylinder(d=3.5, h=24, $fn=20, center=true);
+            }
+        }
+    }
+}
+
+module mgn12_carriage() {
+    translate([0, 45.4/2, 0]) {
+        difference() {
+            translate([0, 0, 5]) {
+                cube([27, 45.4, 10], center=true); 
+            }
+            
+            for(i = [0: 1: 4]) {
+                rotate([0, 0, 360/4*i]) {
+                    translate([10, 10, 5.5]) {
+                        cylinder(d=3.5, h=5, $fn=20);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+module mgn12(length, position) {
+    color("silver") {
+        mgn12_rail(length);
+    }
+    color("green") {
+        translate([0, position, 3]) {
+            mgn12_carriage();
+        }
+    }
+}
+
+
+module echo_x_axis(position) {
+    translate([-230, 0, 560 - 10]) {
+        rotate([0, 90, 0]) {
+            alu_2020(460);
+        }
+    }
+    
+    translate([200, 0, 560]) {
+        rotate([0, 0, 90]) {
+            mgn12(400, position);
+        }
+    }
+}
+
+
+module echo_xy_axis(x_position, y_position) {
+    translate([496/2, -200, 560-10]) {
+        rotate([0, -90, 0]) {
+            mgn12(400, y_position);
+        }
+    }
+    
+    translate([-496/2, -200, 560 - 10]) {
+        rotate([0, 90, 0]) {
+            mgn12(400, y_position);
+        }
+    }
+    
+    translate([0, y_position- 200 + 45.4/2, 0]) {
+        echo_x_axis(x_position-45.4/2);
+    }
+}
+
+
+module echo_z_axis_frame() {
+    translate([-405/2, 300/2+10, 0]) {
+        rotate([0, 90, 0]) {
+            alu_2020(405);
+        }
+    }
+    
+    translate([-405/2, -300/2-10, 0]) {
+        rotate([0, 90, 0]) {
+            alu_2020(405);
+        }
+    }
+    
+    translate([405/2-10, 300/2, 0]) {
+        rotate([90, 0, 0]) {
+            alu_2020(300);
+        }
+    }
+    
+    translate([-405/2+10, 300/2, 0]) {
+        rotate([90, 0, 0]) {
+            alu_2020(300);
+        }
+    }
+}
+
+
+module echo_build_plate() {
+    translate([0, 0, 1.5]) {
+        cube([310, 310, 3], center=true);
+    }
+}
+
+
+module echo_z_axis(position) {
+    translate([-496/2, 0, 460+20]) {
+        rotate([90,180,90]) {
+            mgn12(400, position);
+        }
+    }
+    
+    translate([496/2, 0, 460+20]) {
+        rotate([90,180,-90]) {
+            mgn12(400, position);
+        }
+    }
+    
+    translate([0, 0, 460+20 - 45.4/2 - position]) {
+        echo_z_axis_frame();
+        translate([0, 0, 10]) {
+            echo_build_plate();
+        }
+    }
+}
+
+
+module echo_construction() {
+    echo_frame();
+    echo_xy_axis(200, 150);
+    echo_z_axis(100);
+    
+}
+
+echo_construction();
+//mgn12(400, 350);
 //frame();
-nema17(40);
+//nema17(40);
 
 
